@@ -1,0 +1,3 @@
+Start server: sbt run
+Tests: sbt test
+Generate eclipse project: sbt eclipse

@@ -27,7 +27,7 @@ class Resource {
     @Path("{v1}")
     @Produces(Array("application/xml"))
     def c1(@PathParam("v1") v1: Integer): C1Result = {
-      Main.f2dao.read(v1) match {
+      DemoApp.current.f2dao.read(v1) match {
         case Some(rez) if rez > 10 => C1Result(rez - 10)
         case Some(rez) => C1Result(rez)  
         case None => throw new WebApplicationException(Response.Status.NOT_FOUND);
@@ -37,7 +37,7 @@ class Resource {
     @POST
     @Produces(Array("application/xml"))
     def c2(params: C2Params): C2Result = {
-      Main.f1dao.read(params.v3) match {
+      DemoApp.current.f1dao.read(params.v3) match {
         case Some(f1v3) =>
           val a = f1v3 + params.v2
           val (rez, f2toSave) = if (a < 10) {
@@ -45,7 +45,7 @@ class Resource {
           } else {
             (1, a)
           }
-          Main.f2dao.write(params.v4, f2toSave)
+          DemoApp.current.f2dao.write(params.v4, f2toSave)
           C2Result(rez)
         
         case None => throw new WebApplicationException(Response.Status.NOT_FOUND);

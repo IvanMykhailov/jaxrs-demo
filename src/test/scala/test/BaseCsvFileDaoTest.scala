@@ -9,18 +9,13 @@ import scala.util.Random
 import scala.concurrent._
 import ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
+import test.utils.FileUtils
 
 
 class BaseCsvFileDaoTest extends FlatSpec with Matchers {
-  
-  def testFile() = {
-    val f = new File(s"/tmp/jaxwsdemo/test/test_${Math.abs(Random.nextInt)}.csv")
-    f.delete()
-    f
-  }
-  
+    
   "FileDao" should "save file correctly" in {
-    val f = testFile()
+    val f = FileUtils.testFile()
     val dao = new BaseCsvFileDao(f)
     dao.write(3,3)
     dao.write(5,5)
@@ -31,7 +26,7 @@ class BaseCsvFileDaoTest extends FlatSpec with Matchers {
   }
   
   it should "load file correctly" in {
-    val f = testFile()
+    val f = FileUtils.testFile()
     val dao = new BaseCsvFileDao(f)
     dao.write(3,3)
     dao.write(5,5)
@@ -48,7 +43,7 @@ class BaseCsvFileDaoTest extends FlatSpec with Matchers {
     val data = (0 to 1000).map { i => 
       (i, Random.nextDouble)
     }
-    val f = testFile()
+    val f = FileUtils.testFile()
     val dao = new BaseCsvFileDao(f)
     
     val f1 = future {

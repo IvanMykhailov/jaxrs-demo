@@ -63,7 +63,7 @@ class BaseCsvFileDao(file: File) {
    * 
    * I assume files are relative big and try to avoid load it to memory twice. 
    */
-  private[this] def loadData(): Unit = {    
+  private def loadData(): Unit = {    
     if (file.exists()) {
       rwl.writeLock().lock()
       val s = scala.io.Source.fromFile(file)
@@ -85,15 +85,15 @@ class BaseCsvFileDao(file: File) {
   }
   
   
-  private[this] def saveFile(): Unit = {
+  private def saveFile(): Unit = {
     //use sync to avoid concurent file saving
     this.synchronized {
       rwl.readLock().lock()
       var first = true
       try {
-        val parent = file.getParentFile();
-        if(!parent.exists() && !parent.mkdirs()){
-            throw new IllegalStateException("Couldn't create dir: " + parent);
+        val parent = file.getParentFile()
+        if(!parent.exists && !parent.mkdirs) {
+          throw new IllegalStateException("Couldn't create dir: " + parent)
         }
         
         printToFile(file){ pw =>
@@ -113,7 +113,7 @@ class BaseCsvFileDao(file: File) {
   }
   
   
-  private[this] def printToFile(f: java.io.File)(op: java.io.PrintWriter => Unit) {
+  private def printToFile(f: java.io.File)(op: java.io.PrintWriter => Unit) {
     val p = new java.io.PrintWriter(f)
     try { op(p) } finally { p.close() }
   }

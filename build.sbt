@@ -31,3 +31,4 @@ scalacOptions ++= Seq(
 
 net.virtualvoid.sbt.graph.Plugin.graphSettings
 
+//fork := true
