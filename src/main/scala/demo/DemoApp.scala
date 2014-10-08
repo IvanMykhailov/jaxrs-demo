@@ -31,7 +31,7 @@ class DemoApp(
 }
 
 
-/* Dirty hack to avoid full DI framework */ 
+/* Dirty hack to avoid full-functional DI framework */ 
 object DemoApp {
   private var app: Option[DemoApp] = None
   

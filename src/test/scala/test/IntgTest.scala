@@ -23,7 +23,7 @@ import javax.ws.rs.client.Entity
 class IntgTest extends FlatSpec with Matchers {
 
   
-  "App" should "responce correctly on GET requests" in {
+  "App" should "responds correctly on GET requests" in {
     val f2data = Seq(0d,1d,2d,4.56d,10d,11d,12.34d)
     val f2rez  = Seq(0d,1d,2d,4.56d,10d,1d,2.34d)
     
