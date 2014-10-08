@@ -8,8 +8,12 @@ import java.util.ArrayList
 import scala.collection.JavaConversions._
 
 
-class BaseCsvFileDao(fileName: String) {
+class BaseCsvFileDao(file: File) {
     
+  /*Load all data from file to memory, since CSV format doesn't allow 
+  * direct access and modification, so it is very slow.
+  * Use java ArrayList as least memory consuming and optimal performance storage
+  */  
   val data = new ArrayList[Option[Double]](100)
   val rwl = new ReentrantReadWriteLock()
   
@@ -30,11 +34,17 @@ class BaseCsvFileDao(fileName: String) {
   
   def write(index: Int, value: Double): Unit = {
     rwl.writeLock().lock()
-    if (index >= data.size()) {
-      (data.size() to index + 1).foreach { in => data.add(None)}
+    try {    
+      if (index >= data.size()) {
+        (data.size() to index).foreach { in => data.add(None)}
+      }
+      data.set(index, Some(value))
+    } finally {
+      rwl.writeLock().unlock()
     }
-    data.set(index, Some(value))
-    rwl.writeLock().unlock()
+    /* Remove write clock to allow reading during file saving. 
+     * File saving can be queued and delegated to separate thread
+     * to avoid saving on each modification. */
     saveFile()
   }
   
@@ -47,11 +57,16 @@ class BaseCsvFileDao(fileName: String) {
     }
   }
   
-  private[this] def loadData(): Unit = {
-    rwl.writeLock().lock()
-    val f = new java.io.File(fileName)
-    if (f.exists()) {
-      val s = scala.io.Source.fromFile(f)
+  /*
+   * loadData and saveFile methods don't use conventional scala file processing like 
+   * Source.fromFile(file).mkString.split(",").map(_.toDouble)
+   * 
+   * I assume files are relative big and try to avoid load it to memory twice. 
+   */
+  private[this] def loadData(): Unit = {    
+    if (file.exists()) {
+      rwl.writeLock().lock()
+      val s = scala.io.Source.fromFile(file)
       try {
         while (s.hasNext) {
           val raw = s.takeWhile(_ != ',').mkString
@@ -71,22 +86,29 @@ class BaseCsvFileDao(fileName: String) {
   
   
   private[this] def saveFile(): Unit = {
-    rwl.readLock().lock()
-    var first = true
-    try {
-      val f = new File(fileName)
-      printToFile(f){ pw =>
-        data.foreach { opt =>
-          if (!first) {
-            pw.print(",")
-          } else {
-            first = false
-          }
-          opt.map(v => pw.print(v))
-        }  
-      }    
-    } finally {
-      rwl.readLock().unlock()
+    //use sync to avoid concurent file saving
+    this.synchronized {
+      rwl.readLock().lock()
+      var first = true
+      try {
+        val parent = file.getParentFile();
+        if(!parent.exists() && !parent.mkdirs()){
+            throw new IllegalStateException("Couldn't create dir: " + parent);
+        }
+        
+        printToFile(file){ pw =>
+          data.foreach { opt =>
+            if (!first) {
+              pw.print(",")
+            } else {
+              first = false
+            }
+            opt.map(v => pw.print(v))
+          }  
+        }    
+      } finally {
+        rwl.readLock().unlock()
+      }
     }
   }
   
