@@ -24,7 +24,7 @@ object Main extends App {
     val server = startServer();
     println(s"Jersey app started with WADL available at ${BASE_URI}sapplication.wadl Hit enter to stop it...")
     readLine()
-    server.stop()
+    server.shutdownNow()
     
 }
 

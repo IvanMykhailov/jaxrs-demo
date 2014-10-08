@@ -8,7 +8,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 
-@Path("myresource/{v1}")
+@Path("test")
 class MyResource {
 
     /**
@@ -18,9 +18,16 @@ class MyResource {
      * @return String that will be returned as a text/plain response.
      */
     @GET
+    @Path("myresource/{v1}")
     @Produces(Array("text/plain"))
     def getIt(@PathParam("v1") v1: Integer): String = {
         v1.toString();
     }
 
+    @GET
+    @Path("xml")
+    @Produces(Array("application/xml"))
+    def getXml(): DemoEntity = {
+      DemoEntity("testName", 42)
+    }
 }
